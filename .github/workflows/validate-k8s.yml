@@ -32,7 +32,7 @@ jobs:
           sudo mv kubeconform /usr/local/bin/
 
       - name: Validate base manifests (schema check)
-        run: kubeconform -strict -summary k8s/base/*.yaml
+        run: find k8s/base -name '*.yaml' ! -name 'kustomization.yaml' -print0 | xargs -0 kubeconform -strict -summary
 
       - name: Build and validate dev overlay
         run: kustomize build k8s/overlays/dev
