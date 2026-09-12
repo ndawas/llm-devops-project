@@ -1,0 +1,49 @@
+name: Validate Kubernetes Manifests
+
+on:
+  push:
+    paths:
+      - 'k8s/**'
+  pull_request:
+    paths:
+      - 'k8s/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.30.0'
+
+      - name: Install kustomize
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Validate base manifests (dry-run)
+        run: |
+          for f in k8s/base/*.yaml; do
+            echo "Validating $f"
+            kubectl apply --dry-run=client -f "$f" --validate=false || exit 1
+          done
+
+      - name: Build and validate dev overlay
+        run: kustomize build k8s/overlays/dev
+
+      - name: Build and validate prod overlay
+        run: kustomize build k8s/overlays/prod
+
+      - name: YAML Lint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: k8s/
+          config_data: |
+            extends: default
+            rules:
+              line-length: disable
+              document-start: disable

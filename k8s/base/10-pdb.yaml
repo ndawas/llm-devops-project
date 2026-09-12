@@ -1,0 +1,21 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ollama-pdb
+  namespace: llm-app
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: ollama
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: webui-pdb
+  namespace: llm-app
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: open-webui
