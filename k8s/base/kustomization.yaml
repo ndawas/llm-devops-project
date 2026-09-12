@@ -13,3 +13,4 @@ resources:
   - 08-webui-service.yaml
   - 09-network-policy.yaml
   - 10-pdb.yaml
+  - 11-hpa.yaml
