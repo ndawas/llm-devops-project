@@ -4,9 +4,11 @@ on:
   push:
     paths:
       - 'k8s/**'
+      - 'helm/**'
   pull_request:
     paths:
       - 'k8s/**'
+      - 'helm/**'
   workflow_dispatch: {}
 
 jobs:
@@ -39,6 +41,17 @@ jobs:
 
       - name: Build and validate prod overlay
         run: kustomize build k8s/overlays/prod
+
+      - name: Install helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.15.0'
+
+      - name: Lint Helm chart
+        run: helm lint helm/llm-stack
+
+      - name: Validate Helm chart output (schema check)
+        run: helm template llm-stack helm/llm-stack | kubeconform -strict -summary -
 
       - name: YAML Lint
         uses: ibiqlik/action-yamllint@v3

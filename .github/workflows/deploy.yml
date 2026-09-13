@@ -1,0 +1,48 @@
+name: Deploy to Kubernetes
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'k8s/**'
+      - 'helm/**'
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Only runs once a KUBECONFIG_B64 repo secret is configured, pointing at a
+    # reachable cluster. Without it, this job is skipped (Minikube here runs
+    # locally and isn't reachable from GitHub-hosted runners).
+    if: ${{ vars.CLUSTER_DEPLOY_ENABLED == 'true' }}
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.30.0'
+
+      - name: Install helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.15.0'
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBECONFIG_B64 }}" | base64 --decode > "$HOME/.kube/config"
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install llm-stack helm/llm-stack \
+            --namespace llm-app \
+            --create-namespace \
+            --wait --timeout 5m
+
+      - name: Verify rollout
+        run: |
+          kubectl rollout status deployment/ollama -n llm-app --timeout=120s
+          kubectl rollout status deployment/open-webui -n llm-app --timeout=120s

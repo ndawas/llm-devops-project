@@ -23,6 +23,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: webui-config
+            - secretRef:
+                name: webui-secret
           resources:
             requests:
               cpu: "500m"

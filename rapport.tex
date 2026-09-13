@@ -1,0 +1,474 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath}
+\usepackage[margin=2.5cm,top=3cm,bottom=3.2cm,headheight=22pt]{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{tikz}
+
+\definecolor{navy}{RGB}{20,30,95}
+\definecolor{navylight}{RGB}{235,238,248}
+\definecolor{resumebg}{RGB}{253,247,231}
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codekw}{RGB}{0,90,150}
+\definecolor{codecomment}{RGB}{110,110,110}
+
+% ---------- code listings ----------
+\lstdefinestyle{code}{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codekw}\bfseries,
+    commentstyle=\color{codecomment}\itshape,
+    breaklines=true,
+    frame=single,
+    rulecolor=\color{gray!40},
+    numbers=none,
+    tabsize=2,
+    showstringspaces=false,
+    aboveskip=8pt,
+    belowskip=8pt
+}
+\lstset{style=code}
+
+% ---------- boxes (manual, no tcolorbox dependency) ----------
+\newsavebox{\resumeboxcontent}
+\newenvironment{resumebox}
+ {\begin{lrbox}{\resumeboxcontent}\begin{minipage}{\dimexpr\linewidth-4\fboxsep-2\fboxrule}}
+ {\end{minipage}\end{lrbox}\par\noindent\setlength{\fboxsep}{8pt}\fcolorbox{black!70}{resumebg}{\usebox{\resumeboxcontent}}\par}
+
+\newsavebox{\defboxcontent}
+\newenvironment{defbox}[1]
+ {\def\defboxtitle{#1}\begin{lrbox}{\defboxcontent}\begin{minipage}{\dimexpr\linewidth-4\fboxsep-2\fboxrule}}
+ {\end{minipage}\end{lrbox}%
+  \par\vspace{4pt}\noindent\setlength{\fboxsep}{6pt}%
+  \colorbox{navy}{\parbox{\dimexpr\linewidth-2\fboxsep}{\color{white}\bfseries\defboxtitle}}\par\vspace{-0.4pt}%
+  \noindent\fcolorbox{navy}{navylight}{\usebox{\defboxcontent}}\par\vspace{6pt}}
+
+% ---------- section styling ----------
+\titleformat{\section}{\Large\bfseries\color{navy}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{navy}}{\thesubsection}{1em}{}
+\titlespacing*{\section}{0pt}{16pt}{8pt}
+\titlespacing*{\subsection}{0pt}{10pt}{4pt}
+
+% ---------- headers/footers ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{navy} Projet DevOps : Cloud \& DevOps Bootcamp EPT 2026}
+\fancyhead[R]{\small\color{navy}\bfseries Ollama + Open WebUI}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.6pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{navy}\leaders\hrule height \headrulewidth\hfill}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=navy,
+    urlcolor=navy,
+    citecolor=navy
+}
+
+\captionsetup{font=small,labelfont={bf,color=navy}}
+
+\begin{document}
+
+% ================= TITLE PAGE =================
+% one uniform rule style used everywhere on this page
+\newcommand{\tprule}{{\color{navy}\rule{\linewidth}{0.75pt}}}
+
+\begin{titlepage}
+\centering
+\thispagestyle{empty}
+\vfill
+
+\includegraphics[width=3.4cm]{assets/figures/logo_ept.png}
+
+\vspace{0.9cm}
+
+{\LARGE\bfseries\color{navy} Rapport : Projet DevOps}
+
+\vspace{0.6cm}
+\tprule
+
+\vfill
+
+\vspace{1cm}
+
+\vspace{0.5cm}
+\begin{tikzpicture}
+\node[inner sep=0] (cover) {\includegraphics[width=0.999\textwidth]{assets/figures/docker_banner.jpg}};
+\draw[navy, line width=0.75pt, rounded corners=5pt] (cover.south west) rectangle (cover.north east);
+\end{tikzpicture}
+
+\vfill
+
+\vspace{1cm}
+
+{\Huge\bfseries\color{navy} Déploiement d'Ollama et Open WebUI}\\[0.45cm]
+{\Large\mdseries\color{black!75} avec Docker Compose et Kubernetes (Minikube)}\\[0.3cm]
+
+\vfill
+\tprule
+\vfill
+
+\vspace{0.5cm}
+
+{\bfseries Étudiant}
+
+\vspace{0.25cm}
+
+{\Large\bfseries\color{navy} Abdoulaye Sy Ndaw}\\[0.12cm]
+{\ttfamily\small\color{black!65} ndawas@ept.edu.sn}
+
+\vfill
+
+\vspace{0.8cm}
+
+\noindent
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lr@{}}
+    {\large\textbf{\color{navy}Professeur :}} Ibrahima MBENGUE
+    &
+    {\large\textbf{\color{navy}Dépôt :}} \url{github.com/ndawas/llm-devops-project}
+\end{tabular*}
+
+\vfill
+
+\vspace{0.8cm}
+
+\begin{center}
+    {\large\textbf{\color{navy}Année académique : 2026}}
+\end{center}
+
+\end{titlepage}
+
+% ================= TABLE OF CONTENTS =================
+\thispagestyle{empty}
+\tableofcontents
+
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% ================= SECTION 1 : INTRODUCTION =================
+\section{Introduction}
+
+Les modèles de langage (LLM) open source comme Llama 3, Mistral ou DeepSeek peuvent être exécutés localement, sans dépendre d'une API cloud payante. \textbf{Ollama} sert de moteur d'inférence local : il télécharge, charge en mémoire et sert ces modèles via une API HTTP sur le port 11434. \textbf{Open WebUI} fournit une interface de chat web qui consomme cette API, avec gestion de comptes utilisateurs et historique de conversation.
+
+L'objectif de ce projet est de déployer cette plateforme selon deux approches :
+
+\begin{enumerate}[leftmargin=1.2cm]
+    \item \textbf{Docker Compose} : déploiement local rapide pour le développement, avec deux conteneurs (\texttt{ollama}, \texttt{open-webui}) définis dans un seul fichier \texttt{docker-compose.yaml}.
+    \item \textbf{Kubernetes (Minikube)} : déploiement orchestré simulant un environnement de production, avec neuf types de ressources définies dans \texttt{k8s/base/} et assemblées via Kustomize.
+\end{enumerate}
+
+Ce rapport couvre cinq aspects techniques du déploiement Kubernetes : le rôle de chaque ressource, la communication entre services, la nécessité du stockage persistant, le rôle des probes, et la comparaison avec Docker Compose.
+
+% ================= SECTION 2 : RESSOURCES K8S =================
+\section{Rôle de chaque ressource Kubernetes}
+
+Le projet déploie deux applications (Ollama et Open WebUI) dans le namespace \texttt{llm-app}, à partir des manifests situés dans \texttt{k8s/base/}. Chaque ressource a un rôle précis dans le cycle de vie et l'exposition de ces applications.
+
+\subsection{Namespace}
+Le Namespace \texttt{llm-app} isole toutes les ressources du projet du reste du cluster Minikube. Toutes les ressources suivantes sont créées dans ce namespace, ce qui permet de gérer, lister et supprimer le projet entier sans toucher aux autres workloads du cluster.
+
+\begin{lstlisting}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: llm-app
+\end{lstlisting}
+
+\subsection{ConfigMap}
+Deux ConfigMap stockent les variables de configuration en dehors des images Docker. \texttt{ollama-config} définit \texttt{OLLAMA\_HOST=0.0.0.0} pour qu'Ollama écoute sur toutes les interfaces réseau du pod. \texttt{webui-config} définit \texttt{OLLAMA\_BASE\_URL=http://ollama-service:11434}, l'URL que Open WebUI utilise pour contacter Ollama. Les deux Deployments injectent ces valeurs via \texttt{envFrom.configMapRef}.
+
+\subsection{PersistentVolumeClaim}
+Deux PVC fournissent le stockage persistant : \texttt{ollama-pvc} (20Gi, monté sur \texttt{/root/.ollama}) pour les modèles LLM, et \texttt{webui-pvc} (2Gi, monté sur \texttt{/app/backend/data}) pour les comptes utilisateurs et l'historique de conversation d'Open WebUI. Le détail de leur nécessité est traité en section~4.
+
+\subsection{Deployment}
+Les Deployments \texttt{ollama} et \texttt{open-webui} gèrent le cycle de vie des pods : création, remplacement en cas de crash, rollout lors d'une mise à jour d'image. Chaque Deployment tourne avec \texttt{replicas: 1} dans ce projet, et définit les probes, les volumeMounts et les limites de ressources CPU/mémoire du conteneur.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\linewidth]{assets/figures/07-kubectl-pods-running.jpg}
+\caption{Pods Ollama et Open WebUI en cours d'exécution dans le namespace \texttt{llm-app} (\texttt{kubectl get pods -n llm-app}).}
+\end{figure}
+
+\subsection{Service ClusterIP (ollama-service)}
+\texttt{ollama-service} est un Service de type ClusterIP qui expose le port 11434 des pods Ollama uniquement à l'intérieur du cluster. Il ne fournit pas d'IP externe accessible depuis l'extérieur de Minikube, ce qui correspond à son rôle : point d'entrée interne pour Open WebUI.
+
+\begin{lstlisting}
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama-service
+spec:
+  selector:
+    app: ollama
+  ports:
+    - port: 11434
+      targetPort: 11434
+  type: ClusterIP
+\end{lstlisting}
+
+\subsection{Service NodePort (webui-service)}
+\texttt{webui-service} expose le port 8080 du pod Open WebUI sur le port 30080 de chaque nœud du cluster, via \texttt{type: NodePort}. C'est ce qui permet d'accéder à l'interface web depuis l'extérieur de Minikube, par exemple avec \texttt{minikube service webui-service -n llm-app} ou directement sur \texttt{<node-ip>:30080}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\linewidth]{assets/figures/08-kubectl-services.jpg}
+\caption{Services \texttt{ollama-service} (ClusterIP) et \texttt{webui-service} (NodePort, port 30080) dans le namespace \texttt{llm-app}.}
+\end{figure}
+
+\subsection{NetworkPolicy}
+\texttt{ollama-network-policy} restreint le trafic entrant vers les pods labellisés \texttt{app: ollama}. Seuls les pods labellisés \texttt{app: open-webui} peuvent atteindre le port 11434. Tout autre pod du cluster, même dans le même namespace, ne peut pas contacter Ollama directement. C'est une mesure de sécurité réseau au niveau du cluster, indépendante de toute authentification applicative.
+
+\subsection{PodDisruptionBudget}
+Deux PDB (\texttt{ollama-pdb} et \texttt{webui-pdb}) fixent \texttt{minAvailable: 1} pour chaque application. Lors d'une opération de maintenance planifiée sur le cluster (drain d'un nœud, mise à jour Kubernetes), l'API Kubernetes empêche l'éviction d'un pod si cela fait passer le nombre de pods disponibles sous ce seuil. Avec un seul replica par Deployment dans ce projet, le PDB garantit surtout que le scheduler ne vide pas le pod sans réflexion pendant une opération de cluster.
+
+% ================= SECTION 3 : COMMUNICATION =================
+\section{Communication entre les services}
+
+Le flux de communication suit un chemin fixe, défini par le DNS interne de Kubernetes et la NetworkPolicy.
+
+\begin{enumerate}[leftmargin=1.2cm]
+  \item Open WebUI lit la variable \texttt{OLLAMA\_BASE\_URL} (injectée depuis \texttt{webui-config}) et envoie ses requêtes API vers \texttt{http://ollama-service:11434}.
+  \item Le CoreDNS du cluster résout le nom \texttt{ollama-service} (format court, car les deux pods sont dans le même namespace \texttt{llm-app}) vers l'IP virtuelle (ClusterIP) attribuée au Service \texttt{ollama-service}.
+  \item Le kube-proxy route ce trafic vers un des pods backend du Service, sélectionnés via le label \texttt{app: ollama}, sur le port cible 11434.
+  \item La NetworkPolicy \texttt{ollama-network-policy} vérifie que la requête provient bien d'un pod avec le label \texttt{app: open-webui}. C'est le seul flux entrant autorisé vers Ollama sur ce port ; tout autre trafic est bloqué au niveau du plugin réseau CNI.
+  \item Côté utilisateur, l'accès se fait sur le NodePort 30080 exposé par \texttt{webui-service}. C'est le seul point d'entrée externe du système : Ollama n'est jamais exposé en dehors du cluster.
+\end{enumerate}
+
+\begin{defbox}{Flux de communication}
+\textbf{Utilisateur} $\xrightarrow{\text{NodePort 30080}}$ \textbf{webui-service} $\rightarrow$ pod \texttt{open-webui} $\xrightarrow{\text{DNS interne : ollama-service}}$ \textbf{ollama-service} (ClusterIP, filtré par NetworkPolicy) $\rightarrow$ pod \texttt{ollama} (port 11434).
+\end{defbox}
+
+Ce découpage sépare clairement le trafic interne (Open WebUI vers Ollama, contrôlé par la NetworkPolicy) du trafic externe (utilisateur vers Open WebUI, via NodePort).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\linewidth]{assets/figures/09-openwebui-kubernetes.jpg}
+\caption{Interface Open WebUI accessible depuis l'extérieur du cluster via le NodePort 30080, après résolution du flux interne vers \texttt{ollama-service}.}
+\end{figure}
+
+% ================= SECTION 4 : PVC =================
+\section{Pourquoi les PersistentVolumeClaims sont nécessaires}
+
+Un pod Kubernetes est éphémère par conception. Quand un pod est recréé (crash, rollout, éviction par le scheduler), son système de fichiers local repart de zéro à partir de l'image du conteneur. Sans volume persistant, tout ce qui a été écrit dans le conteneur disparaît.
+
+\textbf{Ollama} télécharge et stocke ses modèles LLM dans \texttt{/root/.ollama}. Sur ce projet, trois modèles sont utilisés : llama3, mistral et deepseek. Ces modèles pèsent plusieurs gigaoctets chacun, ce qui justifie les 20Gi alloués au \texttt{ollama-pvc}. Sans ce PVC, chaque redémarrage du pod Ollama forcerait un nouveau téléchargement complet des trois modèles avant de pouvoir répondre à la moindre requête, ce qui rend le service indisponible pendant plusieurs minutes à chaque redéploiement.
+
+\textbf{Open WebUI} stocke les comptes utilisateurs, les paramètres et l'historique des conversations dans \texttt{/app/backend/data}, monté sur \texttt{webui-pvc} (2Gi). Sans ce PVC, un simple rollout du Deployment \texttt{open-webui} effacerait tous les comptes et tout l'historique de chat.
+
+Avec les PVC en place, le stockage est découplé du cycle de vie du pod. Kubernetes réattache le même volume au nouveau pod après un redémarrage ou une mise à jour d'image, et les données (modèles téléchargés, comptes, historique) survivent à l'opération.
+
+Les captures suivantes montrent deux des modèles répondant via l'instance Open WebUI exposée par Kubernetes (\texttt{minikube service webui-service}, tunnel \texttt{127.0.0.1:58018}), tous deux chargés depuis le volume persistant \texttt{ollama-pvc}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{assets/figures/k8s-llama-response.jpg}
+\caption{Réponse de \texttt{llama3.2:3b} à la question « Explique moi ce qu'est Kubernetes », servie par le pod Ollama sur Kubernetes.}
+\end{figure}
+
+Le contenu technique est correct sur les fonctionnalités clés de Kubernetes (déploiement, scaling, réplication). Le temps de réponse observé confirme que le pod, une fois passé le \texttt{startupProbe}, sert les requêtes normalement via \texttt{ollama-service}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{assets/figures/k8s-mistral-response.jpg}
+\caption{Réponse de \texttt{mistral:7b} à la question « Quel est le rôle d'un PersistentVolumeClaim dans Kubernetes ? », servie par le pod Ollama sur Kubernetes.}
+\end{figure}
+
+La réponse est plus concise et plus précise que celle de llama3.2:3b sur cette question technique ciblée, ce qui est cohérent avec un modèle 7B mieux doté pour ce type d'explication factuelle. Elle mentionne correctement le lien entre PVC et PersistentVolume ainsi que la persistance des données au redémarrage des pods, exactement le point développé plus haut dans cette section.
+
+% ================= SECTION 5 : PROBES =================
+\section{Rôle des probes}
+
+Les Deployments définissent chacun trois types de probes, avec des mécanismes différents selon la nature de l'application.
+
+\subsection{startupProbe}
+Vérifie qu'Ollama a fini de démarrer avant que les autres probes ne prennent le relais. Configurée avec \texttt{failureThreshold: 30} et \texttt{periodSeconds: 10}, ce qui laisse jusqu'à 5 minutes (30 tentatives $\times$ 10 secondes) au conteneur pour devenir opérationnel avant que Kubernetes ne le considère en échec.
+
+\begin{lstlisting}
+startupProbe:
+  exec:
+    command: ["ollama", "list"]
+  failureThreshold: 30
+  periodSeconds: 10
+  timeoutSeconds: 10
+\end{lstlisting}
+
+\subsection{readinessProbe}
+Détermine si le pod est prêt à recevoir du trafic via le Service. Tant que \texttt{ollama list} échoue, le pod est retiré des endpoints de \texttt{ollama-service}, et Open WebUI ne peut pas lui envoyer de requêtes. Cela évite d'envoyer des prompts vers une instance Ollama pas encore prête à les traiter.
+
+\subsection{livenessProbe}
+Détecte un pod bloqué (deadlock, process figé) qui répond toujours aux vérifications TCP de base mais n'exécute plus rien correctement. Si \texttt{ollama list} échoue de façon répétée après le démarrage, kubelet tue et redémarre le conteneur automatiquement, sans intervention manuelle.
+
+\subsection{timeoutSeconds}
+Fixé à 10 secondes sur toutes les probes d'Ollama, au lieu de la valeur par défaut de 1 seconde. La commande \texttt{ollama list} interroge le moteur d'inférence et peut prendre plus d'une seconde à répondre sur les ressources CPU limitées d'un environnement Minikube local, surtout quand un modèle est en cours de chargement en mémoire. Avec le timeout par défaut, les probes auraient échoué en continu par faux positifs.
+
+\begin{defbox}{Différence exec / httpGet}
+\textbf{Ollama} : probes en \texttt{exec} (\texttt{ollama list}), car c'est un moteur CLI sans endpoint HTTP dédié à la santé. \\
+\textbf{Open WebUI} : probes en \texttt{httpGet} sur \texttt{/health}, port 8080, car c'est une application web qui expose nativement un endpoint HTTP de santé, plus léger qu'un \texttt{exec} (pas de fork de process à chaque probe).
+\end{defbox}
+
+\subsection{Cas d'Open WebUI}
+Les probes d'\texttt{open-webui} utilisent \texttt{httpGet} sur le chemin \texttt{/health} et le port 8080, au lieu d'un \texttt{exec}. Contrairement à Ollama, Open WebUI est une application web qui expose nativement un endpoint HTTP de santé, et cela correspond directement au protocole que l'application sert déjà.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\linewidth]{assets/figures/09-openwebui-kubernetes-terminal.jpg}
+\caption{Exposition de \texttt{webui-service} via \texttt{minikube service} : le tunnel ne s'ouvre que parce que la readinessProbe a validé le pod Open WebUI comme prêt à recevoir du trafic.}
+\end{figure}
+
+% ================= SECTION 6 : COMPOSE VS K8S =================
+\section{Différence entre Docker Compose et Kubernetes}
+
+\subsection{Docker Compose}
+Docker Compose est un outil local orienté développement. Le fichier \texttt{docker-compose.yaml} de ce projet définit les deux services (\texttt{ollama}, \texttt{open-webui}), leurs volumes, leur réseau bridge et leurs \texttt{healthcheck} en une trentaine de lignes. Le démarrage se fait avec une seule commande :
+
+\begin{lstlisting}
+docker compose up -d
+\end{lstlisting}
+
+Il n'y a ni haute disponibilité, ni self-healing au niveau orchestrateur : le \texttt{healthcheck} du conteneur \texttt{ollama} permet à \texttt{open-webui} d'attendre qu'Ollama soit \texttt{service\_healthy} avant de démarrer (via \texttt{depends\_on}), mais si le conteneur \texttt{ollama} crashe de façon répétée, Docker Compose ne fait que le relancer selon la police \texttt{restart: unless-stopped}, sans logique de scheduling, de scaling ou de répartition sur plusieurs hôtes.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\linewidth]{assets/figures/01-docker-ps-running.jpg}
+\caption{Conteneurs \texttt{ollama} et \texttt{open-webui} lancés localement via Docker Compose (\texttt{docker ps}).}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\linewidth]{assets/figures/04-llama3-response.jpg}
+\caption{llama3 testé via l'instance Docker Compose locale (\texttt{localhost:3000}), avant déploiement sur Kubernetes.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\linewidth]{assets/figures/05-mistral-response.jpg}
+\caption{mistral testé via l'instance Docker Compose locale.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\linewidth]{assets/figures/06-deepseek-response.jpg}
+\caption{deepseek testé via l'instance Docker Compose locale.}
+\end{figure}
+
+\subsection{Kubernetes}
+Kubernetes ajoute une couche d'orchestration complète : self-healing via les probes et les Deployment controllers, scaling horizontal (non utilisé ici avec \texttt{replicas: 1}, mais disponible nativement), gestion fine des ressources CPU/mémoire par conteneur (\texttt{requests}/\texttt{limits}), health checks à trois niveaux (startup, readiness, liveness) contre un seul \texttt{healthcheck} par service dans Compose, stockage persistant natif découplé du pod via PVC, et NetworkPolicy pour isoler le trafic entre applications.
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Critère} & \textbf{Docker Compose} & \textbf{Kubernetes} \\
+\midrule
+Périmètre & Machine locale unique & Cluster multi-nœuds \\
+Self-healing & Redémarrage simple (\texttt{restart}) & Deployment controller + probes \\
+Health checks & 1 niveau (\texttt{healthcheck}) & 3 niveaux (startup/readiness/liveness) \\
+Scaling & Manuel, un seul hôte & Horizontal, natif \\
+Stockage & Volumes Docker locaux & PVC, découplé du pod \\
+Réseau & Réseau bridge simple & Services + NetworkPolicy \\
+\bottomrule
+\end{tabular}
+\caption{Comparaison fonctionnelle entre Docker Compose et Kubernetes sur ce projet.}
+\end{table}
+
+% ================= SECTION 7 : BONUS =================
+\section{Fonctionnalités bonus}
+
+Au-delà des exigences de base, ce projet implémente l'ensemble des sept fonctionnalités bonus proposées : NetworkPolicy et PodDisruptionBudget (détaillées en sections 2.7 et 2.8), HorizontalPodAutoscaler, overlays Kustomize dev/prod, chart Helm, pipeline CI/CD de déploiement et monitoring Prometheus/Grafana.
+
+\subsection{HorizontalPodAutoscaler}
+\texttt{webui-hpa} met à l'échelle automatiquement le Deployment \texttt{open-webui} entre 1 et 3 replicas, sur deux métriques : utilisation CPU moyenne à 70\% et mémoire à 80\% des \texttt{requests}. Le contrôleur interroge ces métriques via \texttt{metrics-server}, qui expose l'API \texttt{metrics.k8s.io} consommée par le HPA.
+
+\begin{lstlisting}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: webui-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: open-webui
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource: {name: cpu, target: {type: Utilization, averageUtilization: 70}}
+    - type: Resource
+      resource: {name: memory, target: {type: Utilization, averageUtilization: 80}}
+\end{lstlisting}
+
+\subsection{Overlays Kustomize (dev/prod)}
+\texttt{k8s/overlays/dev} et \texttt{k8s/overlays/prod} référencent \texttt{k8s/base} via Kustomize sans dupliquer les manifests, ce qui permet de faire varier la configuration par environnement (par exemple les limites de ressources ou le nombre de replicas) tout en gardant une seule source de vérité pour les ressources communes.
+
+\subsection{Chart Helm}
+Le répertoire \texttt{helm/llm-stack/} reproduit l'intégralité des ressources de \texttt{k8s/base} sous forme de chart Helm paramétrable via \texttt{values.yaml} (images, tailles de stockage, seuils de probes, activation de la NetworkPolicy et du PDB). Le chart est validé automatiquement :
+
+\begin{lstlisting}
+$ helm lint helm/llm-stack
+1 chart(s) linted, 0 chart(s) failed
+
+$ helm template llm-stack helm/llm-stack | kubeconform -strict -summary -
+Summary: 14 resources found parsing stdin - Valid: 14, Invalid: 0, Errors: 0
+\end{lstlisting}
+
+\subsection{Pipeline CI/CD de déploiement}
+Le workflow \texttt{.github/workflows/deploy.yml} ajoute un job \texttt{deploy} qui exécute \texttt{helm upgrade --install} sur un cluster distant. Il est gardé par une variable de dépôt (\texttt{CLUSTER\_DEPLOY\_ENABLED}) et un secret \texttt{KUBECONFIG\_B64} : sans ces deux éléments configurés, le job est ignoré plutôt que d'échouer, ce qui est le comportement attendu tant que le cluster Minikube local n'est pas exposé à GitHub Actions.
+
+\subsection{Monitoring Prometheus et Grafana}
+Une stack de supervision complète est déployée dans le namespace \texttt{monitoring} : Prometheus (avec RBAC pour scraper les nœuds, pods et l'API \texttt{cadvisor}), kube-state-metrics (état des objets Kubernetes), node-exporter (métriques système) et Grafana, avec un datasource et un dashboard provisionnés automatiquement au démarrage.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{assets/figures/prometheus-targets.jpg}
+\caption{Les 4 cibles Prometheus (\texttt{prometheus}, \texttt{kube-state-metrics}, \texttt{kubernetes-cadvisor}, \texttt{node-exporter}) sont toutes \texttt{UP}, sans erreur de scrape.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{assets/figures/grafana-dashboard-top.jpg}
+\caption{Dashboard Grafana « LLM App Overview », haut de page : CPU et mémoire par pod (axe en cores), restarts (minimum à 0), replicas du HPA.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{assets/figures/grafana-dashboard.jpg}
+\caption{Dashboard Grafana « LLM App Overview », suite : replicas du HPA en escalier (plafond à 3), CPU et mémoire du nœud Minikube.}
+\end{figure}
+
+Ce dashboard confirme en direct que les pods \texttt{ollama} et \texttt{open-webui} tournent sans redémarrage, que le HPA reste à 1 replica en charge normale, et que le nœud Minikube dispose de marge CPU et mémoire.
+
+% ================= CONCLUSION =================
+\section{Conclusion}
+
+Ce projet a permis de déployer une plateforme de LLM auto-hébergée (Ollama + Open WebUI) selon deux approches complémentaires. Docker Compose a servi de base pour le développement local, avec un fichier unique et un démarrage en une commande. Kubernetes, via Minikube, a permis de simuler un environnement de production plus proche des contraintes réelles : isolation par namespace, configuration externalisée via ConfigMap, stockage persistant pour les modèles et les données utilisateurs, exposition contrôlée via Services ClusterIP et NodePort, restriction du trafic via NetworkPolicy, health checks à trois niveaux pour la résilience, et PodDisruptionBudget pour les opérations de maintenance. Les deux fichiers (\texttt{docker-compose.yaml} et \texttt{k8s/base/}) coexistent dans le dépôt et couvrent chacun une étape du cycle de vie du projet, complétés par un chart Helm, un pipeline de déploiement et une stack de monitoring pour les fonctionnalités bonus.
+
+La principale leçon technique de ce projet est que l'orchestration Kubernetes n'ajoute pas seulement de la complexité : elle répond à des besoins concrets absents de Docker Compose, en particulier la persistance des données face à des pods éphémères et la détection automatique des pannes via les probes, deux points critiques pour un service qui manipule des modèles LLM volumineux et des données utilisateurs sensibles.
+
+% ================= REFERENCES =================
+\section*{Références}
+\addcontentsline{toc}{section}{Références}
+\begin{enumerate}[leftmargin=1.2cm]
+    \item Documentation officielle Kubernetes : \url{https://kubernetes.io/docs/}
+    \item Documentation officielle Docker Compose : \url{https://docs.docker.com/compose/}
+    \item Documentation Ollama : \url{https://github.com/ollama/ollama}
+    \item Documentation Open WebUI : \url{https://docs.openwebui.com/}
+    \item Documentation Minikube : \url{https://minikube.sigs.k8s.io/docs/}
+    \item Dépôt du projet : \url{https://github.com/ndawas/llm-devops-project}
+\end{enumerate}
+
+\end{document}

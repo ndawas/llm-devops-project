@@ -1,0 +1,72 @@
+namespace: llm-app
+
+ollama:
+  image:
+    repository: ollama/ollama
+    tag: latest
+  service:
+    port: 11434
+  host: "0.0.0.0"
+  resources:
+    requests:
+      cpu: "1"
+      memory: "2Gi"
+    limits:
+      cpu: "4"
+      memory: "6Gi"
+  storage: 20Gi
+  probes:
+    startup:
+      failureThreshold: 30
+      periodSeconds: 10
+      timeoutSeconds: 10
+    readiness:
+      initialDelaySeconds: 5
+      periodSeconds: 15
+      timeoutSeconds: 10
+    liveness:
+      initialDelaySeconds: 15
+      periodSeconds: 30
+      timeoutSeconds: 10
+
+webui:
+  image:
+    repository: ghcr.io/open-webui/open-webui
+    tag: main
+  # Shared session-signing key so replicas agree on JWT validity. Override
+  # this in production (--set webui.secretKey=... or a values file).
+  secretKey: "ceb280924b2021cdc927134f017819d1406396f8ba3bcdb7e5a19c4e2ff8675"
+  service:
+    port: 8080
+    nodePort: 30080
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "2"
+      memory: "3Gi"
+  storage: 2Gi
+  probes:
+    startup:
+      failureThreshold: 30
+      periodSeconds: 10
+    readiness:
+      initialDelaySeconds: 5
+      periodSeconds: 15
+    liveness:
+      initialDelaySeconds: 15
+      periodSeconds: 30
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+networkPolicy:
+  enabled: true
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1

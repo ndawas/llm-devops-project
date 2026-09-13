@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: monitoring
+resources:
+  - 00-namespace.yaml
+  - 01-prometheus-rbac.yaml
+  - 02-prometheus-config.yaml
+  - 03-prometheus-pvc.yaml
+  - 04-prometheus-deployment.yaml
+  - 05-prometheus-service.yaml
+  - 06-kube-state-metrics.yaml
+  - 07-node-exporter.yaml
+  - 08-grafana-provisioning.yaml
+  - 09-grafana-dashboard.yaml
+  - 10-grafana-pvc.yaml
+  - 11-grafana-secret.yaml
+  - 12-grafana-deployment.yaml

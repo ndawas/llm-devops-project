@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ollama-config
+  namespace: {{ .Values.namespace }}
+data:
+  OLLAMA_HOST: {{ .Values.ollama.host | quote }}

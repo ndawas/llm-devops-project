@@ -1,0 +1,10 @@
+Ollama + Open WebUI deployed in namespace "{{ .Values.namespace }}".
+
+Access Open WebUI:
+  minikube service webui-service -n {{ .Values.namespace }}
+
+Or via NodePort directly:
+  http://<node-ip>:{{ .Values.webui.service.nodePort }}
+
+Check pod status:
+  kubectl get pods -n {{ .Values.namespace }} -w

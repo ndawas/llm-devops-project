@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open-webui
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: open-webui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: open-webui
+  template:
+    metadata:
+      labels:
+        app: open-webui
+    spec:
+      containers:
+        - name: open-webui
+          image: "{{ .Values.webui.image.repository }}:{{ .Values.webui.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.webui.service.port }}
+          envFrom:
+            - configMapRef:
+                name: webui-config
+            - secretRef:
+                name: webui-secret
+          resources:
+            requests:
+              cpu: {{ .Values.webui.resources.requests.cpu | quote }}
+              memory: {{ .Values.webui.resources.requests.memory | quote }}
+            limits:
+              cpu: {{ .Values.webui.resources.limits.cpu | quote }}
+              memory: {{ .Values.webui.resources.limits.memory | quote }}
+          volumeMounts:
+            - name: webui-storage
+              mountPath: /app/backend/data
+          startupProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.webui.service.port }}
+            failureThreshold: {{ .Values.webui.probes.startup.failureThreshold }}
+            periodSeconds: {{ .Values.webui.probes.startup.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.webui.service.port }}
+            initialDelaySeconds: {{ .Values.webui.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.webui.probes.readiness.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.webui.service.port }}
+            initialDelaySeconds: {{ .Values.webui.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.webui.probes.liveness.periodSeconds }}
+      volumes:
+        - name: webui-storage
+          persistentVolumeClaim:
+            claimName: webui-pvc
