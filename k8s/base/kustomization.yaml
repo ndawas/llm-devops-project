@@ -15,3 +15,4 @@ resources:
   - 10-pdb.yaml
   - 11-hpa.yaml
   - 12-webui-secret.yaml
+  - 13-webui-ingress.yaml

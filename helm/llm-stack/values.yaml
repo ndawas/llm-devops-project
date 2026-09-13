@@ -63,6 +63,10 @@ webui:
     maxReplicas: 3
     targetCPUUtilizationPercentage: 70
     targetMemoryUtilizationPercentage: 80
+  ingress:
+    enabled: true
+    className: nginx
+    host: llm-app.local
 
 networkPolicy:
   enabled: true
